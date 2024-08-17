@@ -2,14 +2,23 @@ import type { VercelRequest, VercelResponse } from "@vercel/node";
 import axios from "axios";
 
 export default async function handler(req: VercelRequest, res: VercelResponse) {
-  const { baseImageUrl, swapImageUrl } = req.body;
+  if (req.method !== "POST") {
+    return res.status(200).json({ message: "Only POST requests are allowed" });
+  }
+  const { humanImageUrl, outfitUrl, description } = req.body;
+  console.log(humanImageUrl, outfitUrl, description)
   try {
-    if (!baseImageUrl || !swapImageUrl) throw new Error("Images not found!");
+    console.log(process.env.FAL_KEY)
+    if (!humanImageUrl || !outfitUrl) throw new Error("Images not found!");
     const response = await axios.post(
-      "https://fal.run/fal-ai/face-swap",
+      "https://fal.run/fal-ai/idm-vton",
       {
-        base_image_url: baseImageUrl,
-        swap_image_url: swapImageUrl,
+        "human_image_url": humanImageUrl,
+        "garment_image_url": outfitUrl,
+        "garment_type": "upper_body",
+        "description": description,
+        "num_inference_steps": 30,
+        "seed": 42
       },
       {
         headers: {
